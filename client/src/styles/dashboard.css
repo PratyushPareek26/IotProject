@@ -1,0 +1,342 @@
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+
+/*font for modal-> font-family: 'Varela Round', sans-serif; */
+
+/* animation waves */
+
+/* body {
+    background:radial-gradient(ellipse at center, rgba(255,254,234,1) 0%, rgba(255,254,234,1) 35%, #B7E8EB 100%);
+    overflow: hidden;
+  } */
+  
+  .header {
+    position:relative;
+    text-align:center;
+    background: linear-gradient(60deg, rgba(0,0,59,1) 0%, rgba(0,0,236,1) 100%);
+    color:white;
+    /* padding: 10rem 10rem 10rem 10rem; */
+  }
+
+.myintro{
+     padding: 2rem 3rem 2rem 3rem; 
+     color:white;
+     font-size: 1.5rem;
+}
+  
+  
+body {
+    margin:0;
+  }
+  
+  h1 {
+    font-family: 'Lato', sans-serif;
+    font-weight:300;
+    letter-spacing: 2px;
+    font-size:48px;
+  }
+  p {
+    font-family: 'Lato', sans-serif;
+    letter-spacing: 1px;
+    font-size:14px;
+    color: #333333;
+  }
+  
+  
+  .inner-header {
+    height:65vh;
+    width:100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .flex { /*Flexbox for containers*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .waves {
+    position:relative;
+    width: 100%;
+    height:15vh;
+    margin-bottom:-7px; /*Fix for safari gap*/
+    min-height:100px;
+    max-height:150px;
+  }
+  
+  .content {
+    position:relative;
+    height:20vh;
+    text-align:center;
+    background-color: white;
+  }
+  
+  /* Animation */
+  
+  .parallax > use {
+    animation: move-forever 25s cubic-bezier(.55,.5,.45,.5)     infinite;
+  }
+  .parallax > use:nth-child(1) {
+    animation-delay: -2s;
+    animation-duration: 7s;
+  }
+  .parallax > use:nth-child(2) {
+    animation-delay: -3s;
+    animation-duration: 10s;
+  }
+  .parallax > use:nth-child(3) {
+    animation-delay: -4s;
+    animation-duration: 13s;
+  }
+  .parallax > use:nth-child(4) {
+    animation-delay: -5s;
+    animation-duration: 20s;
+  }
+  @keyframes move-forever {
+    0% {
+     transform: translate3d(-90px,0,0);
+    }
+    100% { 
+      transform: translate3d(85px,0,0);
+    }
+  }
+  /*Shrinking for mobile*/
+  @media (max-width: 768px) {
+    .waves {
+      height:40px;
+      min-height:40px;
+    }
+    .content {
+      height:30vh;
+    }
+    h1 {
+      font-size:24px;
+    }
+  }
+/* animation end */
+.cardBody{
+    padding: 2rem 0 2rem 0;
+    background-color: #dee2e6;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    /* position: absolute; */
+    /* width: 207.1vh; */
+}
+
+
+.dashboardControls{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.dashboardControls .dashBtn {
+    color: white;
+    background-color: #000062;
+    border: 0;
+    margin: 0.5rem;
+    min-width: 11rem;
+}
+.modal-body{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    font-family: 'Varela Round', sans-serif;
+}
+.modal-title{
+    margin-left: 2rem;
+}
+.modal-para{
+    margin-left: 5rem;
+}
+.modal-para-val-left{
+    display: inline;
+    margin-left: 6rem;
+}
+.modal-para-val-right{
+    display: inline;
+    margin-left: 4rem;
+}
+.modal-dash-input{
+    display: inline;
+    margin-right: 5rem;
+    margin-left: 2rem;
+}
+.modal-submit{
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 12rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+}
+
+.selectOpt{
+    padding: 9px 180px 6px 138px;
+    background-color: #ccffff;
+}
+
+/* #aboutSection{
+    bottom: 0px;
+    background-color: rgb(10, 8, 44);
+    color: white;
+} */
+.intro{
+    padding: 10rem 10rem 10rem 10rem;
+    margin: 0rem;
+    color:white;
+}
+
+#dash-report{
+    display: flex;
+    /* flex-wrap: wrap; */
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    padding: 4rem 0 4rem 0;
+    background-color :white;
+    color: black;
+    /* min-height: 65vh; */
+    box-shadow: 10px 10px 8px 10px #888888;
+}
+@import url("https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Merienda&display=swap');
+#dash-report h3{
+    /* margin-left: 4rem; */
+    /* font-family: 'Dela Gothic One', cursive; */
+    font-size:3rem;
+}
+
+#dash-box{
+    display:flex;
+    margin:0rem;
+    background-color: white;
+    justify-content: center;
+    padding:5rem;
+
+    
+}
+.report-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:2rem 5rem 2rem 5rem;
+    
+}
+.report-input{
+    margin-top: 2rem;
+    margin-left: 3rem;
+    display: inline-flex;
+    flex-wrap: wrap;
+    border:1px solid grey;
+    border-top-style: none;
+    border-left-style: none;
+    border-right-style: none;
+}
+.report-email{
+    margin-top: 2rem;
+}
+.report-text{
+    margin-top: 2rem;
+    margin-left: 3rem;
+    color:black;
+    display: inline-flex;
+    flex-wrap: wrap;
+    border:1px solid grey;
+    border-top-style: none;
+    border-left-style: none;
+    border-right-style: none;
+	height: 5rem;
+	overflow: hidden;
+	}
+
+	::-moz-placeholder { /* Mozilla Firefox 19+ */
+		line-height:8rem;
+	}
+	::-webkit-input-placeholder { /* Webkit */
+		line-height:8rem;
+	}
+	:-ms-input-placeholder { /* IE */
+		line-height:8rem;
+	}
+
+
+.report-btn{
+    display: flex;
+    flex-wrap: wrap;
+    color: white;
+    background-color: black;
+    margin-top: 1.5rem;
+    margin-left: 3rem;
+    border-radius: 2px;
+    border: none;
+}
+
+
+.dash-map iframe{
+    display: flex;
+    /* border: 2px solid green; */
+    flex-wrap: wrap;
+    width: 100%;
+}
+.footer{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.footer > h1{
+    width: 100vw;
+    text-align: center;
+    padding-top: 2rem;
+    font-family: 'Dela Gothic One', cursive;
+}
+
+.footer, .contact {
+    /* min-width: 50vw; */
+    /* padding: 2em; */
+    margin: 1em;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    /* border: 2px solid red; */
+}
+
+.mails, .github{
+    padding: 1em;
+    flex-direction: column;
+    /* border: 2px solid yellow; */
+}
+
+.github > h6, .mails > h6{
+    margin-left: 4em;
+    font-family: 'Dela Gothic One', cursive;
+
+}
+.github a, .mails a{
+    color: black;
+}
+.github a:hover{
+    color: rgb(94, 93, 93);
+}
+
+.git-list,.dash-mail-id{
+    list-style: none;
+    /* margin: 20px 0 0 0; */
+    /* flex-direction: column; */
+    /* border: 2px solid blue; */
+}
+.footer .copyright{
+    text-align: center;
+    margin: 0 auto;
+    width: 100vw;
+    padding: 0 1em 0 1em;
+    /* border: 2px solid green; */
+}

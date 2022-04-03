@@ -1,46 +1,79 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const bcrypt = require('bcryptjs');
 
 //user model
 const User = require('../models/user.model');
-
-router.get('/', (req, res) => {
-    res.send({token: 'token12345'});
-})
+//userSession model
+const UserSession = require('../models/userSession.model');
 
 router.post('/', (req, res, next) => {
     console.log('login req in backend', req.body);
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     let errors = [];
 
-    //check required
-    if(!name || !password){
-        errors.push({msg: 'please type email and password'})
-    }
+    const emailFormat = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-    User.findOne({username: req.body.username})
+    if (!email) {
+		errors.push('please enter an email')
+	}
+	else if(!email.match(emailFormat)){
+		errors.push('please enter a valid email')
+	}
+    else if(email !== email.toLowerCase())
+        errors.push('upper case characters not allowed')
+
+	if (!password) {
+		errors.push('please enter a password')
+	}
+
+    if(errors.length > 0){
+		return res.send({
+			success: false,
+			errors
+		})
+	}
+
+    User.findOne({email})
     .then((user) => {
-        if(!user) console.log('no such user exists');
+        if(!user){
+            res.send({
+                success: false,
+                errors: ['email is either incorrect or does not exist']
+            })
+        }
 
         else{
             bcrypt.compare(password, user.password, (err, isMatch) => {
-                if (err) {
-                    console.log(err);
-                    res.sendStatus(500);
-                    return;
-                }
-
-                else if(isMatch){
+                if(isMatch){
                     console.log('logged in successfully');
-                    res.send(user);
-                    return;
-                }
+                    
+                    const session = new UserSession();
+                    session.userId = user._id;
+                    session.save((err, data) => {
+                        if(err){ 
+                            console.log('err in saving session ', err);
+                            res.send({
+                                success: false,
+                                errors: ['server error']
+                            })
+                        }
+                        else{
+                            res.send({
+                                success: true,
+                                token: data._id
+                            })
+                        }
+                        
 
+                    })
+                }
                 else if(!isMatch){
-                    console.log('wrong password');
+                    res.send({
+                        success: false,
+                        errors: ['incorrect password']
+                    })
                 }
             })
         }

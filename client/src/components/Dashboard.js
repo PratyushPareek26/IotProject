@@ -1,40 +1,72 @@
+import React, { useEffect, useState, useContext } from 'react';
+
+
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import {Button, Modal} from 'react-bootstrap'
+import { tokenContext } from './App'
+
 import SERVER_URL from '../utils/constants';
 
+import { Button, Modal } from 'react-bootstrap'
+import Alert from 'react-bootstrap/Alert';
 import CoolerCard from './CoolerCard';
+import UpdateRangeModal from './DashboardComps/UpdateRangeModal'
+import AddCoolerModal from './DashboardComps/AddCoolerModal'
+import DeleteCoolerModal from './DashboardComps/DeleteCoolerModal'
 
-import querystring from 'querystring';
+import '../styles/dashboard.css';
+
 
 export default function Dashboard() {
-    // const[range, updateRange] = useState({low: 5, high: 5})
-    const[lowRange, setLowRange] = useState();      //not sure if i should default to 7 or no
-    const[highRange, setHighRange] = useState();
+    const [token, setToken] = useContext(tokenContext);
+
+    //range values from db
+    const [lowRange, setLowRange] = useState();      //not sure if i should default to 7 or no
+    const [highRange, setHighRange] = useState();
+
+    //alert time interval from db
+    const [alertInterval, setAlertInterval] = useState('');
 
     //all coolers from db
     const [coolers, updateCoolers] = useState({});
-    // let coolers = [];
-    // const [drinksaphe, setDrinksaphe] = useState({});
+    const [coolerNames, setCoolerNames] = useState([]);
 
-    //modal states
+    //report form values
+    const [reportFormState, updateEeportFormState] = useState({ email: '', grievance: '' })
+
+
+    //modal states and handlers
     const [showRangeModal, setShowRangeModal] = useState(false);
+    const [rangeSuccess, showRangeSuccess] = useState(false);
+
+    const handleCloseRange = () => setShowRangeModal(false);
+    const handleShowRange = () => setShowRangeModal(true);
+
     const [showAddCoolerModal, setShowAddCoolerModal] = useState(false);
+    const [addCoolerSuccess, showAddCoolerSuccess] = useState(false);
 
-    //range form values
-    const[formLow, setFormLow] = useState(7);
-    const[formHigh, setFormHigh] = useState(7);
+    const handleCloseAddCooler = () => setShowAddCoolerModal(false);
+    const handleShowAddCooler = () => setShowAddCoolerModal(true);
 
-    //addCooler form values
-    const [coolerName, setCoolerName] = useState();
-    const [coolerLoc, setCoolerLoc] = useState();
+    const [showDeleteCoolerModal, setShowDeleteCoolerModal] = useState(false);
+    const [deleteCoolerSuccess, showDeleteCoolerSuccess] = useState(false);
 
+    const handleCloseDeleteCooler = () => {
+        setCoolerNames([]);
+        setShowDeleteCoolerModal(false)
+    };
 
-    let rangeUpdateErr = false;
+    const handleShowDeleteCooler = () => {
+        //populating coolerNames array for dropdown
+        coolers.list.map(cooler => {
+            coolerNames.push({ 'value': cooler._id, 'label': cooler.coolerName })
+        })
+        //populating end
+        setShowDeleteCoolerModal(true)
+    };
 
     //on render, get range from db
-    const getRange = () => {
-        axios.get(`${SERVER_URL}/dashboard/range`)
+    const getRangeAndInterval = () => {
+        axios.get(`${SERVER_URL}/dashboard/rangeAndInterval`)
             .then((res => {
                 console.log('res in frontend', res.data);
                 const newRange = res.data;
@@ -42,10 +74,9 @@ export default function Dashboard() {
 
                 setLowRange(res.data.low);
                 setHighRange(res.data.high);
-                // updateRange(prevRange => {
-                //     return {...prevRange, low:2.33}
-                // });
-                console.log('range state: ',lowRange, highRange);
+                setAlertInterval(res.data.alertInterval);
+
+                console.log('range and interval state: ', lowRange, highRange, alertInterval);
             }))
             .catch(err => console.log('could not get range in frontend', err))
     }
@@ -53,228 +84,111 @@ export default function Dashboard() {
     //on render, get updated list of coolers from db
     const getCoolers = () => {
         axios.get(`${SERVER_URL}/dashboard/getCoolers`)
-        .then((res => {
-            console.log('res in frontend', res.data);
-            updateCoolers(res.data);
-            console.log('get coolers and save in obj', coolers);
-            // updateCoolers(curr => [...curr, coolersList])
-            
-        }))
-        .catch(err => console.log('could not get coolers in frontend', err))
+            .then((res => {
+                console.log('res in frontend', res.data);
+                updateCoolers(res.data);
+                console.log('get coolers and save in obj', coolers);
+
+            }))
+            .catch(err => console.log('could not get coolers in frontend', err))
     }
 
-    //if form is submitted properly, send updated range to backend
-    const updateRange = () => {
-        axios
-            .post(`${SERVER_URL}/dashboard/range`, querystring.stringify({low: formLow, high: formHigh})
-            , {
-                headers: {
-              'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-            },
-            credentials: 'include',
-            withCredentials: true
-            }
-            )
-            .then(res => {
-                if(res.status === 200){
-                    // localStorage.setItem('username', res.data.username);
-                    console.log("frontend knows range is updated, data:", res.data);
-                    // res.redirect('/login');
-                    // history.push('/login')
-                }
-                console.log('range response:',res)
-            })
-            .catch(err => console.log('range error', err))
-    }
-
-    //rerender everytime range is updated
     useEffect(() => {
-        getRange();
+        getRangeAndInterval();
         getCoolers();
-    }, []) //check frequency of rendering?
-
-    //modal actions
-    const handleCloseRange = () => setShowRangeModal(false);
-    const handleShowRange = () => setShowRangeModal(true);
-    const handleCloseAddCooler = () => setShowAddCoolerModal(false);
-    const handleShowAddCooler = () => setShowAddCoolerModal(true);
-
-
-    //addCooler form submit actions
-    const addCooler = event => {
-        event.preventDefault()
-        console.log('cooler form stuff', coolerName, coolerLoc);
-
-        if(!coolerName || !coolerLoc){
-            alert('all values must be filled');
-        }
-        else {
-            axios
-                .post(`${SERVER_URL}/dashboard/addCooler`, querystring.stringify({coolerName: coolerName, location: coolerLoc})
-                , {
-                    headers: {
-                'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-                },
-                credentials: 'include',
-                withCredentials: true
-                }
-                )
-                .then(res => {
-                    if(res.status === 200){
-                        // localStorage.setItem('username', res.data.username);
-                        console.log("frontend knows cooler is added, data:", res.data);
-
-                        getCoolers();
-                        console.log('coolers array: ', coolers.list);
-
-                        handleCloseAddCooler()
-                        // history.push('/login')
-                    }
-                    console.log('addCooler response:',res)
-                })
-                .catch(err => console.log('addCooler error', err))
-        }
-    }
-
-
-    //range edit form submit actions
-    const doUpdateRange = event => {
-        event.preventDefault()
-        console.log('range form stuff: ',formLow, formHigh)
-
-        rangeUpdateErr = false;
-
-        if(formLow > formHigh){
-            console.log('low>high')
-            alert('low value should be less than high value');
-            // rangeUpdateErr.push('low value should be less than high value')
-            rangeUpdateErr = true;
-        }
-        // else rangeUpdateErr = false;
-
-        if(formLow > 14 || formLow < 0 || formHigh > 14 || formHigh < 0){
-            console.log('bad value')
-            alert('range values should be between 0 and 14')
-            // rangeUpdateErr.push('range values should be between 0 and 14')
-            rangeUpdateErr = true;
-        }
-        // else rangeUpdateErr = false;
-
-        if(rangeUpdateErr == false){
-            console.log('errors?',rangeUpdateErr)
-
-            updateRange();
-            setLowRange(formLow)
-            setHighRange(formHigh)
-
-            handleCloseRange();
-            // updateRange({low: formLow, high: formHigh})
-            // console.log(range);
-        }
-        
-    }
+    }, [])
 
     const renderCoolersList = () => {
-        // console.log('len',drinksaphe.coolers.length);
-        if(coolers.list !== undefined){
-            // console.log(drinksaphe._id)
-            // return <p>{drinksaphe._id}</p>
-            return coolers.list.map(cooler => {return <CoolerCard deets = {cooler} low={lowRange} high={highRange} />})
+        if (coolers.list !== undefined) {
+            return coolers.list.map(cooler => { return <CoolerCard key={cooler._id} deets={cooler} alertInterval={alertInterval} low={lowRange} high={highRange} /> })
         }
-        
         else return <p>coolers not loading</p>
     }
 
-    return(
-        <div style={{'display': 'flex', 'flexDirection': 'column','alignItems': 'center'}}>
-            <h2>valid pH range:</h2>
-            <h1 style={{'fontSize': '6rem'}}>{lowRange} - {highRange}</h1>
+    return (
+        <div>
+            {rangeSuccess && <Alert style={{'maxWidth':'25rem', 'position': 'absolute', 'zIndex': '20'}} dismissible key="pass" variant="success" onClose={() => showRangeSuccess(false)}>Range updated successfully</Alert> }
+            {addCoolerSuccess && <Alert style={{'maxWidth':'25rem', 'position': 'absolute', 'zIndex': '20'}} dismissible key="pass" variant="success" onClose={() => showAddCoolerSuccess(false)}>Cooler added successfully</Alert> }
+            {deleteCoolerSuccess && <Alert style={{'maxWidth':'25rem', 'position': 'absolute', 'zIndex': '20'}} dismissible key="pass" variant="success" onClose={() => showDeleteCoolerSuccess(false)}>Cooler deleted successfully</Alert> }
             
-            <div style={{'display': 'flex', 'flexDirection': 'row'}}>
-                <Button style={{'margin':'0.5rem','color': 'white', 'backgroundColor': 'black'}} variant="primary" onClick={handleShowRange}>
-                    Update valid range
-                </Button>
-                <Button style={{'margin':'0.5rem','color': 'white', 'backgroundColor': 'black'}} variant="primary" onClick={handleShowAddCooler}>
-                    Add new cooler
-                </Button>
+            <div className="header">
+            <p className="myintro">“DrinkSapHe©” aims to improve the efficiency of water cooler maintenance process,
+             starting with water coolers of CC3, and perhaps later expanding to the other water
+              coolers of the campus of IIIT-Allahabad. Real-time reporting of water quality levels 
+              will reduce the time it takes to regularly check the quality manually. 
+              The in-built reporting feature makes it easier for students to report problems to the maintenance team.</p>
+            
+
+
+                {/* <!--Waves Container--> */}
+                <div>
+                 <svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto">  
+                 
+                <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g className="parallax">
+                <use xlinkHref="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7" />
+                <use xlinkHref="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
+                <use xlinkHref="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
+                <use xlinkHref="#gentle-wave" x="48" y="7" fill="#dee2e6" />
+                </g>
+                </svg>
+                </div>
+                {/* <!--Waves end--> */}
+
+                </div>
+                {/* <!--Header ends--> */}
+
+            <div className="cardBody " >
+                
+            <h2>Valid pH Range:</h2>
+            <h1 style={{ 'fontSize': '6rem' }}>{lowRange} - {highRange}</h1>
+
+                {token && <div className="dashboardControls">
+                    
+                    <Button className="dashBtn" variant="primary" onClick={handleShowRange}>
+                        Update valid range
+                    </Button>
+                    <UpdateRangeModal
+                        setLowRange={setLowRange}
+                        setHighRange={setHighRange}
+                        showModal={showRangeModal} 
+                        handleClose={handleCloseRange} 
+                        showSuccess={showRangeSuccess} 
+                    />
+
+                    <Button className="dashBtn" variant="primary" onClick={handleShowAddCooler}>
+                        Add new cooler
+                    </Button>
+                    <AddCoolerModal
+                        showModal = {showAddCoolerModal}
+                        handleClose = {handleCloseAddCooler}
+                        showSuccess = {showAddCoolerSuccess}
+                        coolers = {coolers}
+                        getCoolers = {getCoolers}
+                    />
+
+                    <Button className="dashBtn" variant="primary" onClick={handleShowDeleteCooler}>
+                        Delete a cooler
+                    </Button>
+                    <DeleteCoolerModal
+                        showModal = {showDeleteCoolerModal}
+                        handleClose = {handleCloseDeleteCooler}
+                        showSuccess = {showDeleteCoolerSuccess}
+                        coolers = {coolers}
+                        coolerNames = {coolerNames}
+                    />
+
+                </div>}
+
+                <div style={{ 'display': 'flex', 'flexFlow': 'row wrap', 'justifyContent': 'center' }}>
+                    {renderCoolersList()}
+                </div>
+
+                
             </div>
-            
-
-
-            <div style={{'display': 'flex', 'flexFlow': 'row wrap', 'justifyContent': 'center'}}>
-                {renderCoolersList()}
-            </div>
-            
-
-            
-            
-            {/* add new cooler modal */}
-            <Modal show={showAddCoolerModal} onHide={handleCloseAddCooler}>
-                <Modal.Header closeButton>
-                <Modal.Title>Edit Range</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Enter details of new cooler</p>
-                    <form onSubmit = {addCooler}>
-                        <label>
-                            <p>cooler name</p>
-                            <input 
-                                type="text" 
-                                placeholder="for ex: cooler1"
-                                onChange = {event => setCoolerName(event.target.value)}
-                            />
-                        </label>
-                        <label>
-                            <p>cooler location</p>
-                            <input 
-                                type="text" 
-                                placeholder="for ex: in front of room 5448"
-                                onChange = {event => setCoolerLoc(event.target.value)}
-                            />
-                        </label>
-                        <div>
-                            <button type="submit">Add cooler!</button>
-                        </div>
-                    </form>
-                    {/* <p>{rangeUpdateErr[0]}</p> */}
-                    {/* {rangeUpdateErr.length == 0 && <p>no errors</p>}
-                    {rangeUpdateErr.length > 0 && rangeUpdateErr.map(al => {console.log('fafaf'); return <p>{al}</p>;})} */}
-                </Modal.Body>
-            </Modal>
-
-            {/* range modal */}
-            <Modal show={showRangeModal} onHide={handleCloseRange}>
-                <Modal.Header closeButton>
-                <Modal.Title>Edit Range</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Type the updated values of the range</p>
-                    <form onSubmit = {doUpdateRange}>
-                        <label>
-                            <p>low</p>
-                            <input 
-                                type="text" 
-                                placeholder="for ex: 6.9"
-                                onChange = {event => setFormLow(event.target.value)}
-                            />
-                        </label>
-                        <label>
-                            <p>high</p>
-                            <input 
-                                type="text" 
-                                placeholder="for ex: 6.9"
-                                onChange = {event => setFormHigh(event.target.value)}
-                            />
-                        </label>
-                        <div>
-                            <button type="submit">update!</button>
-                        </div>
-                    </form>
-                    {/* <p>{rangeUpdateErr[0]}</p> */}
-                    {/* {rangeUpdateErr.length == 0 && <p>no errors</p>}
-                    {rangeUpdateErr.length > 0 && rangeUpdateErr.map(al => {console.log('fafaf'); return <p>{al}</p>;})} */}
-                </Modal.Body>
-            </Modal>
         </div>
     )
 }

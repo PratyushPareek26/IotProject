@@ -1,19 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
-//iot
-const dweetClient = require('node-dweetio');
-const five = require('johnny-five');
-
-const board = new five.Board();
-const dweetio = new dweetClient();
-//iot end   
+const dotenv = require('dotenv');
 
 const loginRouter = require('./routes/login');
+const logoutRouter = require('./routes/logout');
 const registerRouter = require('./routes/register');
+const userDataRouter = require('./routes/userData');
+const updateProfileRouter = require('./routes/updateProfile');
 const isLoggedInRouter = require('./routes/isLoggedIn');
 const dashboardRouter = require('./routes/dashboard');
+const alertEmailRouter = require('./routes/alertEmail');
+const feedbackRouter = require('./routes/feedback');
 
 const app = express();
 // app.use(cors())
@@ -29,6 +27,8 @@ app.use(
     })
   );
 
+//use environmental variables throughout the app
+dotenv.config()
 
 //mongodb connection
 var MONGODB_URI = "";
@@ -43,58 +43,19 @@ console.log('db uri', MONGODB_URI);
 mongoose.connect(MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection
-db.once('open', () => console.log("db connection established successfully"));
+db.once('open', () => console.log("db connection established successfully "));
 db.on('err', err => console.log('error with db', err));
 //mongodb connection end
 
 
 app.use('/login', loginRouter)
+app.use('/logout', logoutRouter)
 app.use('/register', registerRouter)
+app.use('/getUserData', userDataRouter)
+app.use('/updateProfile', updateProfileRouter)
 app.use('/loggedin', isLoggedInRouter)
 app.use('/dashboard', dashboardRouter)
+app.use('/alertEmail', alertEmailRouter)
+app.use('/sendFeedback', feedbackRouter)
 
-//iot start
-board.on('ready', () => {
-  const temperatureSensor = new five.Sensor({
-    pin: 'A0',
-    threshold: 4
-  });
-
-  temperatureSensor.on('change', (value) => {
-    const dweetThing = 'node-temperature-monitor';
-    let Vo = value;
-    const R1 = 10000;
-    let logR2, R2, T;
-    const c1 = 1.009249522e-03;
-    const c2 = 2.378405444e-04;
-    const c3 = 2.019202697e-07;
-    R2 = R1 * (1023.0 / Vo - 1.0);
-    logR2 = Math.log(R2);
-    T = (1.0 / (c1 + c2 * logR2 + c3 * logR2 * logR2 * logR2));
-    T = T - 273.15;
-    T = (T * 9.0) / 5.0 + 32.0;
-    T = (T - 32) * (5 / 9);
-    const tweetMessage = {
-      temperature: +T.toFixed(2)
-    };
-
-    dweetio.dweet_for(dweetThing, tweetMessage, (err, dweet) => {
-      if (err) {
-        console.log('[Error]: ', err);
-      }
-      if (dweet) {
-        console.log(dweet.content);
-      }
-    });
-  });
-}); 
-//iot end
-
-
-// const Drinksaphe = require('./models/drinksaphe.model');
-// app.post('/createdrinksaphe', (req, res) => {
-//   const newd = new Drinksaphe()
-//   newd.save().then(res => console.log('created', res)).catch(err => console.log('error in creating', err));
-// })
-
-app.listen(8080, () => console.log("server running at port 8080"))
+app.listen(process.env.PORT || 8080, () => console.log("server running at port 8080"))

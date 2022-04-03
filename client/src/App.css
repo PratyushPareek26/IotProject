@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  scroll-behavior: smooth !important;
 }
 
 .App-logo {
@@ -35,4 +36,9 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.wholeApp{
+  font-family: 'Montserrat' !important;
+  padding-top: 3.5rem;
 }

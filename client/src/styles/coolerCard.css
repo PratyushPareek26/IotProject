@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap');
+
+.coolerCard{
+    margin: 0.5rem;
+    align-items: center;
+    width: 18rem;
+    min-height: 15rem;
+    border-width: 3px;
+    color: white;
+    /* background-color: #003; */
+    font-family: 'Merriweather', serif;
+    border-radius: 20px;
+    background-color:#000045;
+    box-shadow: 0.3rem 0.3rem 0.3rem 0.3rem #888888;
+
+}
+.coolerCardTitle{
+    font-size: 2rem;
+    height: 7rem;
+    text-align: center;
+}
+
+.coolerCardBody{
+    padding: 0.7rem 0 0.7rem 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+.coolerCardBtn{
+    width: 7rem;
+    color: black;
+    background-color: rgb(254, 240, 255);
+    border: 0;
+    margin: 0.2rem;
+    /* margin-right: 2vh; */
+}
+
+.coolerCardText{
+     font-size: 1.5rem;
+     color:white;
+}
