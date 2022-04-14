@@ -15,3 +15,71 @@
 ## Pratyush Pareek - IIT2019184
 ## Sanskar Patro - IIT2019205
 ## Dhanush Vasa - IIT2019208
+
+
+### Techstack
+* Frontend - ReactJS
+* Backend - NodeJS, ExpressJS
+* Database - MongoDB
+
+### Built With
+* VS Code / Atom - for developing.
+#### Backend tools and libraries
+* Postman - for testing the API
+* MongoDB Compass / Robo3T - for visualising the database.
+* Mongoose - for easier modelling of database schemas in MongoDB.
+* bcryptjs - for secure storage of passwords.
+* Nodemailer - for automating the sending of emails.
+#### Frontend tools and libraries
+* create-react-app - for initialising react app.
+* react-bootstrap and bootstrap - for responsive design templates.
+
+# How to Use
+## Installation
+
+#### Package Dependencies
+
+* NodeJS
+* NPM
+* MongoDB
+
+Open `git bash` and navigate to your preferred directory.
+<br>
+
+```sh
+git clone https://github.com/PratyushPareek26/IotProject
+cd IotProject
+```
+
+Create a second terminal instance and navigate to the above directory.
+
+#### First instance (backend) - 
+```sh
+cd server
+npm install
+npm start
+```
+
+#### Second instance (frontend) - 
+```sh
+cd client
+npm install
+npm start
+```
+If your default browser does not launch automatically, open a browser tab and navigate to `localhost:3000`. 
+The Backend API will be running at `localhost:8080`.
+
+## First things first
+Create another terminal instance and navigate to the server directory.
+Now, to initialise the database collection, run the following command:
+```
+npm run initDrinksaphe
+```
+Next, you're going to have to generate an admin user for yourself.
+```
+npm run createAdmin
+```
+This command will generate admin credentials in your database. Now you can login using these credentials.
+The admin user has full access to all functionalities of the app, ranging from creating new users to setting the alert interval.
+
+Setup is complete! (Yay?)
