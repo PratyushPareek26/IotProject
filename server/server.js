@@ -13,6 +13,9 @@ const dashboardRouter = require('./routes/dashboard');
 const alertEmailRouter = require('./routes/alertEmail');
 const feedbackRouter = require('./routes/feedback');
 
+
+const Drinksaphe = require('./models/drinksaphe.model');
+
 const app = express();
 // app.use(cors())
 app.use(express.json());
@@ -46,6 +49,79 @@ const db = mongoose.connection
 db.once('open', () => console.log("db connection established successfully "));
 db.on('err', err => console.log('error with db', err));
 //mongodb connection end
+
+//firebase start
+const admin = require('firebase-admin');
+var serviceAccount = require('./admin.json');
+// const { escapeRegExpChars } = require('ejs/lib/utils');
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: "https://iot-project-a6215-default-rtdb.firebaseio.com",
+	authDomain: "iot-project-a6215-default-rtdb.firebaseio.com"
+})
+var dbf = admin.database();
+var test = dbf.ref("test");
+
+async function getTest(res) {
+	let newvals
+	await test.once('value', function(snap) {
+		res.status(200).json({"test": snap.val()});
+		console.log("snapval", snap.val());
+		newvals = snap.val()
+	})
+
+	return newvals
+};
+
+app.post('/dashboard/updatepHFirebase', async function(req, res) {
+	//res.send(test);
+	
+	const {id} = req.body;
+	
+	let newVals = await getTest(res);
+
+	const currentpH = newVals.pH
+	const currentTemp = newVals.Temperature
+	const currentTDS = newVals.TDS
+
+	console.log("newvals", newVals)
+    console.log("cur", currentpH, currentTDS)
+
+    Drinksaphe.findOne({"name": "drinksaphe"})
+        .then(db => {
+
+            //finding index of our cooler
+            let idx = -1;
+            for(let i=0; i<db.coolers.length; i++){
+                if(db.coolers[i]._id.toString() === id.toString()){
+                    console.log('i',i);
+                    idx = i;
+                }
+            }
+            console.log('cooler idx', idx);
+            
+            // updating values
+            db.coolers[idx].currentpH = newVals.pH;
+            db.coolers[idx].currentTemp = newVals.Temperature;
+            db.coolers[idx].currentTDS = newVals.TDS;
+            db.coolers[idx].numOfTimesMeasured++;
+            if(newVals.pH >= db.coolers[idx].highestpH){
+                db.coolers[idx].highestpH = newVals.pH;
+            }
+
+            //saving changes to db
+            db.save()
+                .then(data => {
+                    console.log('updated and saved', data.coolers[idx])
+                    // res.send(data)
+                })
+                .catch(err => console.log('err while saving', err))    
+        })
+        .then(data => res.send({data, currentpH, currentTemp, currentTDS}))
+        .catch(err => console.log('err after saving', err))
+
+});
+//firebase end
 
 
 app.use('/login', loginRouter)

@@ -11,12 +11,22 @@ export default function CoolerCard({deets, alertInterval,low, high}){
     const history = useHistory();
 
     const [ph, setPh] = useState(deets.currentpH);
+    const [temp, setTemp] = useState(deets.currentTemp);
+    const [tds, setTDS] = useState(deets.currentTDS);
+
     const [cardColor, setCardColor] = useState('white');
 
     const updatepH = (type) => {
         console.log('type: ',type);
+        
+        let updateURL = `${SERVER_URL}/dashboard/updatepH`
+
+        if(deets.coolerName.startsWith("Firebase")){
+            updateURL = `${SERVER_URL}/dashboard/updatepHFirebase`
+        }
+
         axios
-            .post(`${SERVER_URL}/dashboard/updatepH`, querystring.stringify({id: deets._id})
+            .post(updateURL, querystring.stringify({id: deets._id})
             , {
                 headers: {
               'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
@@ -29,8 +39,9 @@ export default function CoolerCard({deets, alertInterval,low, high}){
                 if(res.status === 200){
                     console.log("updated ph", res);
                     setPh(res.data.currentpH);
+                    setTemp(res.data.currentTemp);
+                    setTDS(res.data.currentTDS);
 
-                    //send email?
 
                     console.log('ph low high', res.data.currentpH, low, high);
                     let lowNum = Number.parseFloat(low);
@@ -38,12 +49,12 @@ export default function CoolerCard({deets, alertInterval,low, high}){
                     let phNum = Number.parseFloat(res.data.currentpH);
                     console.log(lowNum, phNum, highNum)
 
-                    if(type === 'periodic' && (phNum < lowNum || phNum > highNum)){
+                    if(type === 'periodic' && (phNum < lowNum || phNum > highNum || Number.parseFloat(res.data.currentTDS)>300)){
                         console.log('sending an email', res.data.currentpH, lowNum, highNum);
-                        sendAlertEmail(res.data.currentpH);
+                        sendAlertEmail(res.data.currentpH, res.data.currentTDS);
                     }
                 }
-                // console.log('update ph response:',res.data.currentpH)
+                // console.log('update ph response:',res.data.currentpH)    
             })
             .catch(err => console.log('update ph error', err))
     }
@@ -53,7 +64,7 @@ export default function CoolerCard({deets, alertInterval,low, high}){
 	}
 
     const sendAlertEmail = (curpH) => {
-            
+            console.log("sending email")
         axios.post(`${SERVER_URL}/alertEmail`, {deets, currentpH: curpH})
             .then(res => console.log('email sent frontend ', res))
             .catch(err => console.log('email error frontend ', err))
@@ -63,9 +74,9 @@ export default function CoolerCard({deets, alertInterval,low, high}){
         let lowNum = Number.parseFloat(low);
         let highNum = Number.parseFloat(high);
         let phNum = Number.parseFloat(ph);
-        if(phNum < lowNum || phNum > highNum){
+        if(phNum < lowNum || phNum > highNum || deets.currentTDS > 300){
             setCardColor('red');
-            // sendAlertEmail();        //removed so that email will only be sent in periodic intervals instead of whenever somebody updates
+            // sendAlertEmail(res.data.currentpH, res.data.currentTDS);        //removed so that email will only be sent in periodic intervals instead of whenever somebody updates
             console.log(`ph of ${deets.coolerName} is out of range`)
         }
         else 
@@ -99,6 +110,8 @@ export default function CoolerCard({deets, alertInterval,low, high}){
                 <Card.Body>
                 <Card.Title className="coolerCardTitle">{deets.coolerName}</Card.Title>
                 <Card.Text className="coolerCardText">Current pH: {ph || 'unavailable'}</Card.Text>
+                <Card.Text className="coolerCardText">Temperature: {temp || 'unavailable'}°C</Card.Text>
+				<Card.Text className="coolerCardText">TDS: {tds || 'unavaikable'}</Card.Text>
                 <Card.Text className="coolerCardText">Location: {deets.location}</Card.Text>
 				</Card.Body>
 

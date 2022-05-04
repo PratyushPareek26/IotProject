@@ -105,13 +105,15 @@ router.post('/addCooler', (req, res) => {
     const {coolerName, location} = req.body;
 
     const currentpH = waterQuality[Math.floor(Math.random()*waterQuality.length)].pH
+    const currentTemp = Math.floor(Math.random()*15)+5
+    const currentTDS = Math.floor(Math.random()*300)+50
 
 
     console.log('addCooler req in backend + pH', req.body, currentpH);
 
     Drinksaphe.findOne({"name": "drinksaphe"})
         .then(db => {
-            db.coolers.push({coolerName, location, currentpH})
+            db.coolers.push({coolerName, location, currentpH, currentTemp, currentTDS})
             db.save()
             .then(data => {
                 console.log('addCooler backend response', data)
@@ -156,6 +158,9 @@ router.post('/updatepH', (req, res) => {
     const {id} = req.body;
 
     const currentpH = waterQuality[Math.floor(Math.random()*waterQuality.length)].pH
+    const currentTemp = Math.floor(Math.random()*15)+5
+    const currentTDS = Math.floor(Math.random()*300)+50
+
     console.log('new pH', currentpH);
     
     Drinksaphe.findOne({"name": "drinksaphe"})
@@ -173,6 +178,8 @@ router.post('/updatepH', (req, res) => {
             
             // updating values
             db.coolers[idx].currentpH = currentpH;
+            db.coolers[idx].currentTemp = currentTemp;
+            db.coolers[idx].currentTDS = currentTDS;
             db.coolers[idx].numOfTimesMeasured++;
             if(currentpH >= db.coolers[idx].highestpH){
                 db.coolers[idx].highestpH = currentpH;
@@ -186,7 +193,7 @@ router.post('/updatepH', (req, res) => {
                 })
                 .catch(err => console.log('err while saving', err))    
         })
-        .then(data => res.send({data, currentpH}))
+        .then(data => res.send({data, currentpH, currentTemp, currentTDS}))
         .catch(err => console.log('err after saving', err))
 
 })

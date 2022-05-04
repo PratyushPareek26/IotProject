@@ -112,7 +112,7 @@ export default function Footer() {
                   &copy; drinksapHe. All rights reserved | Created by Group of IIITA Students
                </div>
 
-            </div>
+            {/* </div> */}
 
         </footer>
     )

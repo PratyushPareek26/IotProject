@@ -8,6 +8,7 @@
     "dotenv": "^8.2.0",
     "email-templates": "^8.0.3",
     "express": "^4.17.1",
+    "firebase-admin": "^10.0.2",
     "mongoose": "^5.11.19",
     "nodemailer": "^6.5.0",
     "passport": "^0.4.1",

@@ -61,7 +61,8 @@ router.post('/', (req, res) => {
           username,
           email,
 		  alertEmail: email,
-          password
+          password,
+		  lastWorked: '0'
         });
 
         bcrypt.genSalt(10, (err, salt) => {

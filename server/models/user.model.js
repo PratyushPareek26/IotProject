@@ -29,6 +29,10 @@ const userSchema = new Schema({
     alertEmail: {
         type: String,
         trim: true
+    },
+    lastWorked: {
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true

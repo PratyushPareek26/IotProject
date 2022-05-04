@@ -9,6 +9,12 @@ const coolerSchema = new Schema({
     currentpH: {
         type: Number, //only integers. may need to convert to float later (need to add extra plugin)
     },
+    currentTemp: {
+        type: Number
+    },
+    currentTDS: {
+        type: Number
+    },
     highestpH: {
         type: Number,
         default: 0
